@@ -1,4 +1,4 @@
-# chord_space_v0.5
+# chord_space_v0.5.1
 
 1. install python:
 	https://www.python.org/downloads/
