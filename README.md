@@ -6,6 +6,7 @@
 
 2. verify that python is working:
 	`python`
+	(version 3.10 or higher required)
 
 3. verify that pip is working:
 	`pip --version`
