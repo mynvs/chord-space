@@ -6,7 +6,7 @@ import math
 from PIL import Image
 import itertools
 
-BASE_FREQ = 30*(2**3)
+BASE_FREQ = 220*(2**(1/4))  # 30*(2**3)
 DEPTH = 35
 MAX_KNOBS = 7
 ENABLE_FPS = True
@@ -120,15 +120,15 @@ def interval_sign(x):
     elif math.sqrt(32/9)+e<=x<=2-e:
         return (1, 'M9')
     elif math.sqrt(9/8)-e<x<math.sqrt(9/8)+e:
-        return (0, 'n1')
+        return (2, 'n1')
     elif math.sqrt(3/2)-e<x<math.sqrt(3/2)+e:
-        return (0, 'n3')
+        return (2, 'n3')
     elif math.sqrt(2)-e<x<math.sqrt(2)+e:
-        return (0, 'n5')
+        return (2, 'n5')
     elif math.sqrt(8/3)-e<x<math.sqrt(8/3)+e:
-        return (0, 'n7')
+        return (2, 'n7')
     elif math.sqrt(32/9)-e<x<math.sqrt(32/9)+e:
-        return (0, 'n9')
+        return (2, 'n9')
     elif 1<x<1+e or 2-e<x<2:
         return (0, '.0')
     elif 9/8-e<x<9/8+e:
@@ -139,7 +139,6 @@ def interval_sign(x):
         return (0, 'p6')
     elif 16/9-e<x<16/9+e:
         return (0, 'p8')
-
     return (0, '  ')
 
     # binary tree version
@@ -262,6 +261,21 @@ while running:
                 painting = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
+                # left click
+                mouse_held = True
+                mouse_pos = event.pos
+                closest_line_index = None
+                min_distance = float('inf')
+                for i, value in enumerate(knob_values):
+                    log_value = np.log2(value%1+1)
+                    line_ctr = knob_center + pygame.math.Vector2(height*0.25 * np.sin(log_value * TAU),
+                                                                -height*0.25 * np.cos(log_value * TAU))
+                    dist = line_ctr.distance_to(mouse_pos)
+                    if dist < min_distance:
+                        min_distance = dist
+                        closest_line_index = i
+                active_line_index = closest_line_index
+            elif event.button == 3:  # right click
                 if pygame.key.get_mods() & pygame.KMOD_CTRL:  # ctrl + left click
                     mouse_pos = event.pos
                     closest_line_index = None
@@ -279,22 +293,7 @@ while running:
                         phase_vectors = np.delete(phase_vectors, closest_line_index)
                         num_knobs -= 1
                         active_line_index = min(active_line_index, num_knobs-1)
-                else:  # left click
-                    mouse_held = True
-                    mouse_pos = event.pos
-                    closest_line_index = None
-                    min_distance = float('inf')
-                    for i, value in enumerate(knob_values):
-                        log_value = np.log2(value%1+1)
-                        line_ctr = knob_center + pygame.math.Vector2(height*0.25 * np.sin(log_value * TAU),
-                                                                    -height*0.25 * np.cos(log_value * TAU))
-                        dist = line_ctr.distance_to(mouse_pos)
-                        if dist < min_distance:
-                            min_distance = dist
-                            closest_line_index = i
-                    active_line_index = closest_line_index
-            elif event.button == 3:  # right click
-                if num_knobs+1 <= 9:
+                elif num_knobs+1 <= 9:
                     mouse_pos = event.pos
                     dx, dy = pygame.math.Vector2(mouse_pos) - knob_center
                     angle = math.atan2(dy, dx)*0.5*PI_INV
@@ -432,12 +431,14 @@ while running:
                 for i, d in enumerate(distances):
                     sign, degree = interval_sign(np.power(2,d))
                         
-                    if sign >= 1:
-                        text_intervals = font.render(f'{degree} {d:.4f}', True, (158, 0, 0))
+                    if sign == 1:
+                        text_intervals = font.render(f'{degree} {d:.4f}', True, (255, 101, 187))
                     elif sign == -1:
-                        text_intervals = font.render(f'{degree} {d:.4f}', True, (0, 155, 157))
+                        text_intervals = font.render(f'{degree} {d:.4f}', True, (0, 220, 176))
+                    elif sign == 2:
+                        text_intervals = font.render(f'{degree:} {d:.4f}', True, (155, 158, 255))
                     else:
-                        text_intervals = font.render(f'{degree:} {d:.4f}', True, (158, 155, 157))
+                        text_intervals = font.render(f'{degree:} {d:.4f}', True, (206, 206, 206))
                     window.blit(text_intervals, (3, height-len(distances)*15 + i*15 - 1))
 
         # for i, text in enumerate(legend_text):
