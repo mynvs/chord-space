@@ -15,18 +15,19 @@ ENABLE_DETAIL = False
 SQRT3 = math.sqrt(3)
 SQRT3_INV = 1/math.sqrt(3)
 LOG2_5TH = math.log2(1.5)+1
-LOG2_3RD = math.log2(1.25)+1
-LOG2_PHI = 0.694241913631
+LOG2_MAJ_3RD = math.log2(1.25)+1
+LOG2_MIN_3RD = math.log2(1.2)+1
+# LOG2_PHI = 0.694241913631
 PI_INV = 1/np.pi
 TAU = 2*np.pi
 
 pygame.init()
-pygame.display.set_caption('v0.5.1')
+pygame.display.set_caption('v0.5.2')
 if ENABLE_FPS:
     clock = pygame.time.Clock()
 font = pygame.font.Font('assets/JetBrainsMono-Regular.ttf', 12)
 height = 600
-width = int((1+0.5*SQRT3)*height)
+width = int((1+0.5*SQRT3)*height)-1
 window = pygame.display.set_mode((width, height))
 
 buffersize = 2048
@@ -87,6 +88,68 @@ def thomaes_function():
 def octave_reduce(x):
     return 2 ** (math.log2(x) % 1)
 
+def pitch_class_distance(a, b):
+    value = abs(a-b)
+    return value
+    # if value <= 0.5:
+    #     return value
+    # else:
+    #     return 1-value
+    
+def interval_sign(x):
+    x = x%1 + 1
+    e = 0.0003
+    if 1+e<=x<=math.sqrt(9/8)-e:
+        return (-1, 'm1')
+    elif 9/8+e<=x<=math.sqrt(3/2)-e:
+        return (-1, 'm3')
+    elif 4/3+e<=x<=math.sqrt(2)-e:
+        return (-1, 'm5')
+    elif 3/2+e<=x<=math.sqrt(8/3)-e:
+        return (-1, 'm7')
+    elif 16/9+e<=x<=math.sqrt(32/9)-e:
+        return (-1, 'm9')
+    elif math.sqrt(9/8)+e<=x<=9/8-e:
+        return (1, 'M1')
+    elif math.sqrt(3/2)+e<=x<=4/3-e:
+        return (1, 'M3')
+    elif math.sqrt(2)+e<=x<=3/2-e:
+        return (1, 'M5')
+    elif math.sqrt(8/3)+e<=x<=16/9-e:
+        return (1, 'M7')
+    elif math.sqrt(32/9)+e<=x<=2-e:
+        return (1, 'M9')
+    elif math.sqrt(9/8)-e<x<math.sqrt(9/8)+e:
+        return (0, 'n1')
+    elif math.sqrt(3/2)-e<x<math.sqrt(3/2)+e:
+        return (0, 'n3')
+    elif math.sqrt(2)-e<x<math.sqrt(2)+e:
+        return (0, 'n5')
+    elif math.sqrt(8/3)-e<x<math.sqrt(8/3)+e:
+        return (0, 'n7')
+    elif math.sqrt(32/9)-e<x<math.sqrt(32/9)+e:
+        return (0, 'n9')
+    elif 1<x<1+e or 2-e<x<2:
+        return (0, '.0')
+    elif 9/8-e<x<9/8+e:
+        return (0, 'p2')
+    elif 4/3-e<x<4/3+e:
+        return (0, 'p4')
+    elif 3/2-e<x<3/2+e:
+        return (0, 'p6')
+    elif 16/9-e<x<16/9+e:
+        return (0, 'p8')
+
+    return (0, '  ')
+
+    # binary tree version
+
+    # if x < math.sqrt(2):
+    #     pass
+    # else:
+    #     pass
+
+
 hue_colors = {i: get_hue_colors(i) for i in range(1, MAX_KNOBS + 1)}
 white = np.array((255,255,255))
 thomae = thomaes_function()
@@ -112,11 +175,11 @@ while running:
     if keys[pygame.K_LSHIFT]:
         sign = 2.75
         signh = -1
-        rot_val = LOG2_3RD
+        rot_val = LOG2_MAJ_3RD
     elif keys[pygame.K_LCTRL]:
         sign = 0.025
         signh = 8
-        rot_val = LOG2_PHI
+        rot_val = LOG2_MIN_3RD
     
     if keys[pygame.K_h]:
         hue_offset += signh*10
@@ -159,7 +222,7 @@ while running:
             elif event.key == pygame.K_z:
                 window.fill((0,0,0))
                 if 3 <= num_knobs:
-                    window.blit(harm, (height-1, 0))
+                    window.blit(harm, (height, 0))
                 painting = True
             elif event.key == pygame.K_x:
                 ghost_lines = not ghost_lines
@@ -167,6 +230,9 @@ while running:
                 divider = not divider
             elif event.key == pygame.K_w:
                 knob_values = np.power(2, (np.linspace(1, 2, num_knobs, endpoint=False) + np.random.rand())%1) - 1
+
+            # if event.key == pygame.K_g:
+            #     knob_values = np.nan_to_num(2 / knob_values)
                 
 
             match event.key:
@@ -196,19 +262,46 @@ while running:
                 painting = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                mouse_held = True
-                mouse_pos = event.pos
-                closest_line_index = None
-                min_distance = float('inf')
-                for i, value in enumerate(knob_values):
-                    log_value = np.log2(value%1+1)
-                    line_ctr = knob_center + pygame.math.Vector2(height*0.25 * np.sin(log_value * TAU),
-                                                                -height*0.25 * np.cos(log_value * TAU))
-                    dist = line_ctr.distance_to(mouse_pos)
-                    if dist < min_distance:
-                        min_distance = dist
-                        closest_line_index = i
-                active_line_index = closest_line_index
+                if pygame.key.get_mods() & pygame.KMOD_CTRL:  # ctrl + left click
+                    mouse_pos = event.pos
+                    closest_line_index = None
+                    min_distance = float('inf')
+                    for i, value in enumerate(knob_values):
+                        log_value = np.log2(value%1+1)
+                        line_ctr = knob_center + pygame.math.Vector2(height*0.25 * np.sin(log_value * TAU),
+                                                                    -height*0.25 * np.cos(log_value * TAU))
+                        dist = line_ctr.distance_to(mouse_pos)
+                        if dist < min_distance:
+                            min_distance = dist
+                            closest_line_index = i
+                    if closest_line_index is not None and num_knobs > 1:
+                        knob_values = np.delete(knob_values, closest_line_index)
+                        phase_vectors = np.delete(phase_vectors, closest_line_index)
+                        num_knobs -= 1
+                        active_line_index = min(active_line_index, num_knobs-1)
+                else:  # left click
+                    mouse_held = True
+                    mouse_pos = event.pos
+                    closest_line_index = None
+                    min_distance = float('inf')
+                    for i, value in enumerate(knob_values):
+                        log_value = np.log2(value%1+1)
+                        line_ctr = knob_center + pygame.math.Vector2(height*0.25 * np.sin(log_value * TAU),
+                                                                    -height*0.25 * np.cos(log_value * TAU))
+                        dist = line_ctr.distance_to(mouse_pos)
+                        if dist < min_distance:
+                            min_distance = dist
+                            closest_line_index = i
+                    active_line_index = closest_line_index
+            elif event.button == 3:  # right click
+                if num_knobs+1 <= 9:
+                    mouse_pos = event.pos
+                    dx, dy = pygame.math.Vector2(mouse_pos) - knob_center
+                    angle = math.atan2(dy, dx)*0.5*PI_INV
+                    new_value = np.power(2,(angle+0.25)%1)-1
+                    knob_values = np.append(knob_values, new_value)
+                    phase_vectors = np.append(phase_vectors, 1j)
+                    num_knobs += 1
         elif event.type == pygame.MOUSEMOTION:
             if event.buttons[0] == 1:
                 mouse_pos = event.pos
@@ -229,12 +322,12 @@ while running:
 
     if 3 <= num_knobs:
         if not painting:
-            window.blit(harm, (height-1, 0))
+            window.blit(harm, (height, 0))
             
         if divider and not painting:
             line_surface = pygame.Surface((height, height))
             pygame.draw.aaline(line_surface, (60,16,55), (0,height-1), (SQRT3_INV*(height-1), 0), 1)
-            window.blit(line_surface, (height, 0), special_flags=pygame.BLEND_RGB_ADD)
+            window.blit(line_surface, (height+1, 0), special_flags=pygame.BLEND_RGB_ADD)
 
         subsets = list(itertools.combinations(set(knob_values), 3))
 
@@ -246,13 +339,13 @@ while running:
 
             if (v >= 2*u - 2) and (u + v <= 3):
                 point_x = SQRT3 * (v - 1) * (height-1) + height+1
-                point_y = -(2*u - v - 1) * (height-1) + height
+                point_y = height - (2*u - v - 1) * (height-1)
             elif (u + v > 3) and (2*v - u >= 1):
                 point_x = SQRT3 * (u - v) * (height-1) + height+1
-                point_y = -(4 - u - v) * (height-1) + height
+                point_y = height - (4 - u - v) * (height-1)
             elif (v < 2*u - 2) and (2*v - u < 1):
                 point_x = SQRT3 * (2 - u) * (height-1) + height+1
-                point_y = -(2*v - u) * (height-1) + height
+                point_y = height - (2*v - u) * (height-1)
             
             pygame.draw.circle(window, colors[0], (point_x, point_y), 2)
 
@@ -298,10 +391,10 @@ while running:
 
         if ghost_lines:
             for i in range(start_index, thomae[0].size-1):
-                # line_width = round(np.power(255/(val[i-start_index]), 0.06))
+                line_width = round(np.power(255/(val[i-start_index]), 0.06))
                 for j in range(num_knobs):
                     color = tuple(np.round(val[i-start_index] * colors[j]))
-                    pygame.draw.line(window, color, knob_center, (coords_x[i-start_index, j], coords_y[i-start_index, j]), 1)
+                    pygame.draw.line(window, color, knob_center, (coords_x[i-start_index, j], coords_y[i-start_index, j]), line_width)
             for j in range(num_knobs):
                 color = tuple(np.round(val[-1] * colors[j]))
                 pygame.draw.aaline(window, color, knob_center, (coords_x[-1, j], coords_y[-1, j]))
@@ -310,22 +403,43 @@ while running:
             coords_y1 = knob_center.y - height*0.35 * np.cos(angles)
 
             for i in range(start_index, thomae[0].size-1):
-                # line_width = round(np.power(255/(val[i-start_index]), 0.06))
+                line_width = round(np.power(255/(val[i-start_index]), 0.06))
                 for j in range(num_knobs):
                     color = tuple(np.round(val[i-start_index] * colors[j]))
-                    pygame.draw.line(window, color, (coords_x1[i-start_index, j], coords_y1[i-start_index, j]), (coords_x[i-start_index, j], coords_y[i-start_index, j]), 1)
+                    pygame.draw.line(window, color, (coords_x1[i-start_index, j], coords_y1[i-start_index, j]), (coords_x[i-start_index, j], coords_y[i-start_index, j]), line_width)
             for j in range(num_knobs):
                 color = tuple(np.round(val[-1] * colors[j]))
                 pygame.draw.aaline(window, color, knob_center, (coords_x1[-1, j], coords_y1[-1, j]))
 
 
-    freqs = BASE_FREQ * (np.sort(knob_values)%1 + 1)
+    sorted_indices = knob_values.argsort()
+    
+    freqs = BASE_FREQ * (np.sort(knob_values[sorted_indices])%1 + 1)
+    sorted_colors = np.array(colors)[sorted_indices]
 
     if not painting:
         if ENABLE_DETAIL:
-            for i in range(num_knobs):
-                text_freq = font.render(f'{freqs[i]:.5f} Hz', True, (158, 155, 157))
-                window.blit(text_freq, (3, height-num_knobs*15 + i*15 - 1))
+            if num_knobs == 1:
+                text_freq = font.render(f'{freqs[0]:.5f} Hz', True, (255, 255, 255))
+                window.blit(text_freq, (55, height-16))
+            else:
+                for i in range(num_knobs):
+                    text_freq = font.render(f'{freqs[i]:.5f} Hz', True, sorted_colors[i])
+                    window.blit(text_freq, (120, height-num_knobs*15 + i*15 - 1))
+
+                intervals = list(itertools.combinations(set(np.log2(knob_values%1 + 1)), 2))
+                distances = sorted([pitch_class_distance(i[0], i[1]) for i in intervals])
+                for i, d in enumerate(distances):
+                    sign, degree = interval_sign(np.power(2,d))
+                        
+                    if sign >= 1:
+                        text_intervals = font.render(f'{degree} {d:.4f}', True, (158, 0, 0))
+                    elif sign == -1:
+                        text_intervals = font.render(f'{degree} {d:.4f}', True, (0, 155, 157))
+                    else:
+                        text_intervals = font.render(f'{degree:} {d:.4f}', True, (158, 155, 157))
+                    window.blit(text_intervals, (3, height-len(distances)*15 + i*15 - 1))
+
         # for i, text in enumerate(legend_text):
         #     legend_surface = font.render(text, True, (158, 155, 157))
         #     window.blit(legend_surface, (width-241, height-len(legend_text)*14 + i*14 - 3))
@@ -341,6 +455,8 @@ while running:
             window.blit(fps_surface, (3,-2))
 
     pygame.display.flip()
+
+    freqs = BASE_FREQ * (knob_values%1 + 1)
 
     if pygame.mixer.Channel(0).get_queue() is None:
         angles = (TAU * freqs * inv_smplr).astype(complex)

@@ -1,0 +1,1 @@
+start cmd /k "echo nchord_space.py"
