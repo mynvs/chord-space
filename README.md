@@ -14,4 +14,4 @@
 4. install the required libraries:
 	`pip install -r requirements`
 
-#Itch.io page: https://mynvs.itch.io/chord-space
+# itch.io page: https://mynvs.itch.io/chord-space
