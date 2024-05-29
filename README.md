@@ -20,4 +20,5 @@
    	- open a cmd terminal in "string-theory-filter-main" directory
 	- run \``pip install -r requirements`\`
 
-### itch.io page: https://mynvs.itch.io/chord-space
+# itch.io page:
+## https://mynvs.itch.io/chord-space
