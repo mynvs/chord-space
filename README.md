@@ -23,5 +23,5 @@
 # itch.io page:
 ## https://mynvs.itch.io/chord-space
 
-![loading image...](https://github.com/mynvs/chord-space/blob/images/image1.png?raw=true)
-![loading image...](https://github.com/mynvs/chord-space/blob/images/image2.png?raw=true)
+![loading image...](https://github.com/mynvs/chord-space/blob/images/image1.webp?raw=true)
+![loading image...](https://github.com/mynvs/chord-space/blob/images/image2.webp?raw=true)
