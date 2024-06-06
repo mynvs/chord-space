@@ -17,7 +17,7 @@
 	- run \``pip --version`\`
 
 7. install required libraries:
-   	- open a cmd terminal in "chord-space-main" directory
+   	- open a cmd terminal in the main directory
 	- run \``pip install -r requirements`\`
 
 # itch.io page:
