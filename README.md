@@ -1,4 +1,7 @@
 # chord_space_v0.5.3
+![Python](https://img.shields.io/badge/python-3.10-blue.svg)
+![Repo Size](https://img.shields.io/github/repo-size/mynvs/chord-space)
+[![Downloads](https://pepy.tech/badge/global-chem)](https://pepy.tech/project/global-chem)
 
 ### installation
 
