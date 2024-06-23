@@ -23,7 +23,7 @@
 	- run \``pip install -r requirements`\`
 
 # itch.io page:
-## https://mynvs.itch.io/chord-space
+### https://mynvs.itch.io/chord-space
 
 ![image](https://raw.githubusercontent.com/mynvs/images/main/image1.webp)
 ![image](https://raw.githubusercontent.com/mynvs/images/main/image2.webp)
