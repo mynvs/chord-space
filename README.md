@@ -1,4 +1,4 @@
-# chord_space_v0.5.4
+# chord space
 ![python](https://img.shields.io/badge/python-3.10-blue.svg)
 ![repo size](https://img.shields.io/github/repo-size/mynvs/chord-space)
 
