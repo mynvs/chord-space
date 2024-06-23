@@ -1,6 +1,6 @@
 # chord_space_v0.5.4
-![Python](https://img.shields.io/badge/python-3.10-blue.svg)
-![Repo Size](https://img.shields.io/github/repo-size/mynvs/chord-space)
+![python](https://img.shields.io/badge/python-3.10-blue.svg)
+![repo size](https://img.shields.io/github/repo-size/mynvs/chord-space)
 
 ### installation
 
@@ -25,5 +25,5 @@
 # itch.io page:
 ## https://mynvs.itch.io/chord-space
 
-![loading image...](https://raw.githubusercontent.com/mynvs/images/main/image1.webp)
-![loading image...](https://raw.githubusercontent.com/mynvs/images/main/image2.webp)
+![image](https://raw.githubusercontent.com/mynvs/images/main/image1.webp)
+![image](https://raw.githubusercontent.com/mynvs/images/main/image2.webp)
