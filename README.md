@@ -26,4 +26,4 @@
 ## https://mynvs.itch.io/chord-space
 
 ![loading image...](https://github.com/mynvs/chord-space/blob/images/image1.webp?raw=true)
-![loading image...](https://github.com/mynvs/chord-space/blob/images/image2.webp?raw=true)
+![loading image...](https://raw.githubusercontent.com/mynvs/images/main/image2.webp?token=GHSAT0AAAAAACQWEYLYICARTV7EBIJSQ3ZCZTYVCVQ)
