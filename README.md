@@ -24,5 +24,5 @@
 
 ## itch.io page: https://mynvs.itch.io/chord-space
 
-![image](https://raw.githubusercontent.com/mynvs/images/main/image1.webp)
-![image](https://raw.githubusercontent.com/mynvs/images/main/image2.webp)
+![image](https://raw.githubusercontent.com/mynvs/images/main/chord-space_image1.webp)
+![image](https://raw.githubusercontent.com/mynvs/images/main/chord-space_image2.webp)
